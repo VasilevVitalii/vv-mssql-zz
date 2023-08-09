@@ -427,7 +427,7 @@ BEGIN
 		END ELSE BEGIN
 			GOTO exx_while1
 		END
-		SET @i = @i + 1	
+		SET @i = @i + 1
 	END
 	exx_while1:
 
@@ -439,9 +439,11 @@ BEGIN
 		END ELSE BEGIN
 			GOTO exx_while2
 		END
-		SET @i = @i - 1	
+		SET @i = @i - 1
 	END
-	exx_while2:	
+	exx_while2:
+
+	RETURN SUBSTRING(@Value, @il + 1, LEN(@value) - @il - @ir)
 END
 GO
 
