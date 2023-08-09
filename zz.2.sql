@@ -432,10 +432,11 @@ BEGIN
 	exx_while1:
 
 	SET @i = LEN(@value)
+	SET @ir = @i + 1
 	WHILE @i > 0 BEGIN
 		SET @s = SUBSTRING(@Value, @i, 1)
 		IF @s = CHAR(9) OR @s = CHAR(10) OR @s = CHAR(13) OR @s = CHAR(32) OR @s = CHAR(160) BEGIN
-			SET @ir = @i + 1
+			SET @ir = @i
 		END ELSE BEGIN
 			GOTO exx_while2
 		END
@@ -443,7 +444,7 @@ BEGIN
 	END
 	exx_while2:
 
-	RETURN SUBSTRING(@Value, @il + 1, LEN(@value) - @il - @ir)
+	RETURN SUBSTRING(@Value, @il + 1, @ir - @il - 1)
 END
 GO
 
