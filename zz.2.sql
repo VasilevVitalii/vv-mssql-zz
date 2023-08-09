@@ -29,20 +29,20 @@ BEGIN
 	DECLARE @len INT; SET @Len=LEN(@Value);
 	IF @len=1 BEGIN
 		IF @Value LIKE '[0-9]' RETURN 1
-		RETURN 0                 	
+		RETURN 0
 	END
-	IF SUBSTRING(@Value,1,1)='-' BEGIN 
+	IF SUBSTRING(@Value,1,1)='-' BEGIN
 		SET @Value=RIGHT(@Value,@len-1)
 		SET @len=@len-1
-	END	
+	END
 	IF @Value LIKE '%,%' OR @Value LIKE '%.%' BEGIN
 		SET @Value=REVERSE(@Value)
 		DECLARE @point INT
 		SET @point=PATINDEX('%[,.]%',@Value)-1
 		IF @point<>0 BEGIN
-			IF SUBSTRING(@Value,1,@point) LIKE '%[^0]%' RETURN 0	
+			IF SUBSTRING(@Value,1,@point) LIKE '%[^0]%' RETURN 0
 		END
-		SET @Value=LEFT(REVERSE(@Value),@len-@point-1)  
+		SET @Value=LEFT(REVERSE(@Value),@len-@point-1)
 	END
 	IF @Value LIKE '%[^0-9]%' RETURN 0
 	RETURN 1
@@ -69,25 +69,25 @@ BEGIN
 	DECLARE @len INT; SET @Len=LEN(@Value);
 	IF @len=1 BEGIN
 		IF @Value LIKE '[0-9]' RETURN 1
-		RETURN 0                 	
+		RETURN 0
 	END
-	IF SUBSTRING(@Value,1,1)='-' BEGIN 
+	IF SUBSTRING(@Value,1,1)='-' BEGIN
 		SET @Value=RIGHT(@Value,@len-1)
 		SET @len=@len-1
-	END	
+	END
 	IF @Value LIKE '%,%' OR @Value LIKE '%.%' BEGIN
 		SET @Value=REVERSE(@Value)
 		DECLARE @point INT
 		SET @point=PATINDEX('%[,.]%',@Value)-1
 		IF @point=0 BEGIN
-			SET @Value=LEFT(REVERSE(@Value),@len-1) 
-		END ELSE IF @point<=4 BEGIN 
-			IF LEFT(@Value,@point) LIKE '%[^0-9]%' RETURN 0	      	
+			SET @Value=LEFT(REVERSE(@Value),@len-1)
+		END ELSE IF @point<=4 BEGIN
+			IF LEFT(@Value,@point) LIKE '%[^0-9]%' RETURN 0
 		END ELSE BEGIN
 			IF LEFT(@Value,@point) LIKE '%[^0-9]%' RETURN 0
 			IF LEFT(@Value,@point-4) LIKE '%[^0]%' RETURN 0
 		END
-		SET @Value=LEFT(REVERSE(@Value),@len-@point-1)  
+		SET @Value=LEFT(REVERSE(@Value),@len-@point-1)
 	END
 	IF @Value LIKE '%[^0-9]%' RETURN 0
 	RETURN 1
@@ -104,7 +104,7 @@ CREATE OR ALTER FUNCTION [zz].[StrIsDate](@Value NVARCHAR(MAX))
 --		dd.mm.yyyy
 --		dd.mm.yyyy hh:mm
 --		dd.mm.yyyy hh:mm:ss
---		yyyy-mm-ddThh:mm:ss 
+--		yyyy-mm-ddThh:mm:ss
 --		yyyy-mm-ddThh:mm:ss.mmm
 --		dd.mm.yyyy hh:mm:ss.mmm
 RETURNS BIT
@@ -120,45 +120,45 @@ BEGIN
 			DECLARE @fndYear VARCHAR(4)
 			SET @fndYear=SUBSTRING(@Value,7,2)
 			--20 век: 51 - 99, 21 век: 00 - 50
-			IF (LEFT(@fndYear,1)='5' AND RIGHT(@fndYear,1)<>'0') 
+			IF (LEFT(@fndYear,1)='5' AND RIGHT(@fndYear,1)<>'0')
 			OR (LEFT(@fndYear,1) IN ('6','7','8','9'))
 			BEGIN
 				SET @fndYear='19'+@fndYear
 			END ELSE BEGIN
-				SET @fndYear='20'+@fndYear     	
+				SET @fndYear='20'+@fndYear
 			END
-			SET @DD126=@fndYear +'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'		
+			SET @DD126=@fndYear +'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'
 		END ELSE BEGIN
 			--yyyymmdd
-			SET @DD126=LEFT(@Value,4)+'-'+SUBSTRING(@Value,5,2)+'-'+SUBSTRING(@Value,7,2)+'T00:00:00.000'         	
-		END 
+			SET @DD126=LEFT(@Value,4)+'-'+SUBSTRING(@Value,5,2)+'-'+SUBSTRING(@Value,7,2)+'T00:00:00.000'
+		END
 	END ELSE IF @Len=10 BEGIN
 		--dd.mm.yyyy
 		IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' BEGIN
-			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'	
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'
 		END
 	END ELSE IF @Len=16 BEGIN
 		--dd.mm.yyyy hh:mm
 		IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' AND SUBSTRING(@Value,11,1)=' ' AND SUBSTRING(@Value,14,1)=':' BEGIN
-    		SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':00.000'
-		END	     	
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':00.000'
+		END
 	END ELSE IF @Len=19 BEGIN
 		IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' AND SUBSTRING(@Value,11,1)=' ' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' BEGIN
 			--dd.mm.yyyy hh:mm:ss
-    		SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.000'
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.000'
 		END	ELSE IF SUBSTRING(@Value,5,1)='-' AND SUBSTRING(@Value,8,1)='-' AND SUBSTRING(@Value,11,1)='T' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' BEGIN
-			--yyyy-mm-ddThh:mm:ss 
-		   	SET @DD126=@Value+'.000'
-		END     	
+			--yyyy-mm-ddThh:mm:ss
+			SET @DD126=@Value+'.000'
+		END
 	END	ELSE IF @Len=23 BEGIN
 		IF SUBSTRING(@Value,5,1)='-' AND SUBSTRING(@Value,8,1)='-' AND SUBSTRING(@Value,11,1)='T' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' AND SUBSTRING(@Value,20,1)='.' BEGIN
 			--yyyy-mm-ddThh:mm:ss.mmm
 			SET @DD126=@Value
 		END	ELSE IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' AND SUBSTRING(@Value,11,1)=' ' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' AND SUBSTRING(@Value,20,1)='.' BEGIN
 			--dd.mm.yyyy hh:mm:ss.mmm
-		   	SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.'+SUBSTRING(@Value,21,3)
-		END 
-	END	
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.'+SUBSTRING(@Value,21,3)
+		END
+	END
 
 	IF @DD126 IS NULL RETURN 0
 	RETURN ISDATE(@DD126)
@@ -196,8 +196,8 @@ CREATE OR ALTER FUNCTION [zz].[StrToInt](@Value NVARCHAR(MAX))
 RETURNS INT
 AS
 BEGIN
-	IF @Value IS NULL RETURN NULL 
-	IF zz.StrIsInt(@Value)=0 RETURN NULL 
+	IF @Value IS NULL RETURN NULL
+	IF zz.StrIsInt(@Value)=0 RETURN NULL
 	IF @Value LIKE '%,%' OR @Value LIKE '%.%' BEGIN
 		SET @Value=REVERSE(@Value)
 		DECLARE @point INT
@@ -205,7 +205,7 @@ BEGIN
 		SET @Value=REVERSE(@Value)
 		SET @Value=LEFT(@Value,LEN(@Value)-@point)
 		RETURN CONVERT(INT,@Value)
-	END	
+	END
 	RETURN CONVERT(INT,@Value)
 END
 GO
@@ -217,9 +217,9 @@ CREATE OR ALTER FUNCTION [zz].[StrToMoney](@Value NVARCHAR(MAX))
 RETURNS MONEY
 AS
 BEGIN
-	IF @Value IS NULL RETURN NULL 
+	IF @Value IS NULL RETURN NULL
 	IF zz.StrIsMoney(@Value)=0 RETURN NULL
-	SET @Value=REPLACE(@Value,',','.') 
+	SET @Value=REPLACE(@Value,',','.')
 	RETURN CONVERT(MONEY,@Value)
 END
 GO
@@ -231,7 +231,7 @@ CREATE OR ALTER FUNCTION [zz].[StrToDate](@Value NVARCHAR(MAX))
 RETURNS DATETIME
 AS
 BEGIN
-	IF @Value IS NULL RETURN NULL 
+	IF @Value IS NULL RETURN NULL
 
 	DECLARE @len INT; SET @Len=LEN(@Value);
 	DECLARE @DD126 VARCHAR(23)
@@ -242,49 +242,49 @@ BEGIN
 			DECLARE @fndYear VARCHAR(4)
 			SET @fndYear=SUBSTRING(@Value,7,2)
 			--20 century: 51 - 99, 21 century: 00 - 50
-			IF (LEFT(@fndYear,1)='5' AND RIGHT(@fndYear,1)<>'0') 
+			IF (LEFT(@fndYear,1)='5' AND RIGHT(@fndYear,1)<>'0')
 			OR (LEFT(@fndYear,1) IN ('6','7','8','9'))
 			BEGIN
 				SET @fndYear='19'+@fndYear
 			END ELSE BEGIN
-				SET @fndYear='20'+@fndYear     	
+				SET @fndYear='20'+@fndYear
 			END
-			SET @DD126=@fndYear +'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'		
+			SET @DD126=@fndYear +'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'
 		END ELSE BEGIN
 			--yyyymmdd
-			SET @DD126=LEFT(@Value,4)+'-'+SUBSTRING(@Value,5,2)+'-'+SUBSTRING(@Value,7,2)+'T00:00:00.000'         	
-		END 
+			SET @DD126=LEFT(@Value,4)+'-'+SUBSTRING(@Value,5,2)+'-'+SUBSTRING(@Value,7,2)+'T00:00:00.000'
+		END
 	END ELSE IF @Len=10 BEGIN
 		--dd.mm.yyyy
 		IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' BEGIN
-			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'	
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T00:00:00.000'
 		END
 	END ELSE IF @Len=16 BEGIN
 		--dd.mm.yyyy hh:mm
 		IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' AND SUBSTRING(@Value,11,1)=' ' AND SUBSTRING(@Value,14,1)=':' BEGIN
-    		SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':00.000'
-		END	     	
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':00.000'
+		END
 	END ELSE IF @Len=19 BEGIN
 		IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' AND SUBSTRING(@Value,11,1)=' ' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' BEGIN
 			--dd.mm.yyyy hh:mm:ss
-    		SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.000'
-		END ELSE IF SUBSTRING(@Value,5,1)='-' AND SUBSTRING(@Value,8,1)='-' AND SUBSTRING(@Value,11,1)='T' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' BEGIN 
-			--yyyy-mm-ddThh:mm:ss 
-		   	SET @DD126=@Value+'.000'	
-		END 
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.000'
+		END ELSE IF SUBSTRING(@Value,5,1)='-' AND SUBSTRING(@Value,8,1)='-' AND SUBSTRING(@Value,11,1)='T' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' BEGIN
+			--yyyy-mm-ddThh:mm:ss
+			SET @DD126=@Value+'.000'
+		END
 	END	ELSE IF @Len=23 BEGIN
 		IF SUBSTRING(@Value,5,1)='-' AND SUBSTRING(@Value,8,1)='-' AND SUBSTRING(@Value,11,1)='T' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' AND SUBSTRING(@Value,20,1)='.' BEGIN
 			--yyyy-mm-ddThh:mm:ss.mmm
 			SET @DD126=@Value
 		END	ELSE IF SUBSTRING(@Value,3,1)='.' AND SUBSTRING(@Value,6,1)='.' AND SUBSTRING(@Value,11,1)=' ' AND SUBSTRING(@Value,14,1)=':' AND SUBSTRING(@Value,17,1)=':' AND SUBSTRING(@Value,20,1)='.' BEGIN
 			--dd.mm.yyyy hh:mm:ss.mmm
-		   	SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.'+SUBSTRING(@Value,21,3)
-		END 
-	END	
+			SET @DD126=SUBSTRING(@Value,7,4)+'-'+SUBSTRING(@Value,4,2)+'-'+LEFT(@Value,2)+'T'+SUBSTRING(@Value,12,2)+':'+SUBSTRING(@Value,15,2)+':'+SUBSTRING(@Value,18,2)+'.'+SUBSTRING(@Value,21,3)
+		END
+	END
 
 	IF @DD126 IS NULL RETURN NULL
 	IF ISDATE(@DD126)<>1 RETURN NULL
-	 
+
 	RETURN CONVERT(DATETIME,@DD126)
 END
 GO
@@ -345,20 +345,20 @@ RETURNS NVARCHAR(MAX)
 AS
 BEGIN
 	IF @Value IS NULL RETURN NULL
-	
+
 	IF @Format ='n.n' BEGIN
 		DECLARE @r1 NVARCHAR(MAX)=CONVERT(NVARCHAR(MAX),@Value,2)
 		WHILE RIGHT(@r1,1)='0' BEGIN
-			SET @r1=LEFT(@r1,LEN(@r1)-1) 
+			SET @r1=LEFT(@r1,LEN(@r1)-1)
 		END
-		IF RIGHT(@r1,1)='.' SET @r1=LEFT(@r1,LEN(@r1)-1) 
+		IF RIGHT(@r1,1)='.' SET @r1=LEFT(@r1,LEN(@r1)-1)
 		RETURN @r1
 	END IF @Format ='n,n' BEGIN
 		DECLARE @r2 NVARCHAR(MAX)=CONVERT(NVARCHAR(MAX),@Value,2)
 		WHILE RIGHT(@r2,1)='0' BEGIN
-			SET @r2=LEFT(@r2,LEN(@r2)-1) 
+			SET @r2=LEFT(@r2,LEN(@r2)-1)
 		END
-		IF RIGHT(@r2,1)='.' SET @r2=LEFT(@r2,LEN(@r2)-1) 
+		IF RIGHT(@r2,1)='.' SET @r2=LEFT(@r2,LEN(@r2)-1)
 		RETURN REPLACE(@r2,'.',',')
 	END ELSE  IF @Format ='n.2' BEGIN
 		RETURN CONVERT(NVARCHAR(MAX),@Value,0)
@@ -392,7 +392,7 @@ RETURNS NVARCHAR(MAX)
 AS
 BEGIN
 	IF @Value IS NULL RETURN NULL
-	
+
 	IF @Format IN ('ds','yyyymmdd') BEGIN
 		RETURN CONVERT(NVARCHAR(MAX),@Value,112)
 	END IF @Format IN ('d','dd.mm.yyyy') BEGIN
@@ -496,9 +496,9 @@ BEGIN
 				END ELSE IF zz.StrIsDate(@currentValue)=1 BEGIN
 					SET @replaceLexem=zz.StrFromDate(zz.StrToDate(@currentValue),'d')
 				END ELSE IF ISDATE(@currentValue)=1 BEGIN
-					SET @replaceLexem=zz.StrFromDate(@currentValue,'d')	
+					SET @replaceLexem=zz.StrFromDate(@currentValue,'d')
 				END ELSE BEGIN
-					SET @replaceLexem=@currentValue	
+					SET @replaceLexem=@currentValue
 				END
 			END ELSE IF @findLexem IN ('{s}') BEGIN
 				IF @currentValue IS NULL BEGIN
@@ -517,10 +517,10 @@ BEGIN
 			END ELSE IF @findLexem IN ('{n.n}','{n,n}','{n.2}','{n,2}','{n.4}','{n,4}') BEGIN
 				IF @currentValue IS NULL BEGIN
 					SET @replaceLexem='<EMPTY>'
-				END ELSE BEGIN			
+				END ELSE BEGIN
 					IF zz.StrIsMoney(@currentValue)=1 BEGIN
 						SET @replaceLexem=zz.StrFromMoney(zz.StrToMoney(@currentValue),SUBSTRING(@findLexem,2,LEN(@findLexem)-2))
-					END	
+					END
 				END
 			END ELSE IF @findLexem IN ('{ds}','{d}','{dm}','{dms}','{dmsm}') BEGIN
 				IF @currentValue IS NULL BEGIN
@@ -529,9 +529,9 @@ BEGIN
 					IF zz.StrIsDate(@currentValue)=1 BEGIN
 						SET @replaceLexem=zz.StrFromDate(zz.StrToDate(@currentValue),SUBSTRING(@findLexem,2,LEN(@findLexem)-2))
 					END ELSE IF ISDATE(@currentValue)=1 BEGIN
-						SET @replaceLexem=zz.StrFromDate(@currentValue,SUBSTRING(@findLexem,2,LEN(@findLexem)-2))	
-					END	
-				END			
+						SET @replaceLexem=zz.StrFromDate(@currentValue,SUBSTRING(@findLexem,2,LEN(@findLexem)-2))
+					END
+				END
 			END
 
 			IF @replaceLexem IS NOT NULL BEGIN
