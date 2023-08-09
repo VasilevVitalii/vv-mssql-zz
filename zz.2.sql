@@ -410,6 +410,41 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER FUNCTION [zz].[StrTrim](@Value NVARCHAR(MAX))
+--trim string, remove new lines, spaces, tabs
+RETURNS NVARCHAR(MAX)
+AS
+BEGIN
+	DECLARE @i INT, @s VARCHAR(1)
+	DECLARE @il INT; SET @il = 0
+	DECLARE @ir INT; SET @ir = 0
+
+	SET @i = 1
+	WHILE LEN(@value) >= @i BEGIN
+		SET @s = SUBSTRING(@Value, @i, 1)
+		IF @s = CHAR(9) OR @s = CHAR(10) OR @s = CHAR(13) OR @s = CHAR(32) OR @s = CHAR(160) BEGIN
+			SET @il = @i
+		END ELSE BEGIN
+			GOTO exx_while1
+		END
+		SET @i = @i + 1	
+	END
+	exx_while1:
+
+	SET @i = LEN(@value)
+	WHILE @i > 0 BEGIN
+		SET @s = SUBSTRING(@Value, @i, 1)
+		IF @s = CHAR(9) OR @s = CHAR(10) OR @s = CHAR(13) OR @s = CHAR(32) OR @s = CHAR(160) BEGIN
+			SET @ir = @i + 1
+		END ELSE BEGIN
+			GOTO exx_while2
+		END
+		SET @i = @i - 1	
+	END
+	exx_while2:	
+END
+GO
+
 CREATE OR ALTER FUNCTION [zz].[KillTime](@Value DATETIME)
 --Crop time from DATETIME
 RETURNS DATETIME
